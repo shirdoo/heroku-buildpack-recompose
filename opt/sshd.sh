@@ -10,14 +10,13 @@ if [[ "$DYNO" != *run.* ]] && [ "$JMX_ENABLED" = "true" ]; then
     NGROK_OPTS="${NGROK_OPTS} --authtoken ${NGROK_API_TOKEN}"
   fi
 
-  banner_file="/app/.ssh/banner.txt"
-  cat << EOF > ${banner_file}
-Connected to $DYNO
-EOF
+  [ "$JMX_DEBUG" = "true" ] && echo "Starting sshd for $(whoami)@${ip_addr}"
+  /usr/sbin/sshd -f /app/.ssh/sshd_config -o "Port 1222"
+  ssh -o StrictHostKeyChecking=no -D ${ssh_port} -p 1222 localhost -N &
 
-  echo "Starting sshd for $(whoami)@${ip_addr}"
-  /usr/sbin/sshd -f /app/.ssh/sshd_config -o "Port ${ssh_port}" -o "Banner ${banner_file}"
-  #eval "while sleep 30; do echo \"Waiting for ssh connection from $(whoami)@$ip_addr...\"; done" &
+  # Start the server that can provide user and ip info
+  json="{\"dyno\": \"${DYNO}\", \"user\": \"$(whoami)\", \"ip\": \"${ip_addr}\", \"rmiPort\": \"${rmi_port}\", \"jmxPort\": \"${jmx_port}\", \"sshPort\": \"${ssh_port}\"}"
+  ruby -rwebrick -e"s=WEBrick::HTTPServer.new(:BindAddress => \"0.0.0.0\", :Port => 2221, :DocumentRoot => Dir.pwd); s.mount_proc('/'){|q,r| r.body='${json}'}; s.start" &
 
   # Start the tunnel
   ngrok_cmd="ngrok tcp -log stdout ${NGROK_OPTS} ${ssh_port}"
