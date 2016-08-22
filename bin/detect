@@ -1,4 +1,4 @@
 #!/bin/sh
 
-echo "SSH"
+echo "JAR file"
 exit 0
