@@ -1,4 +1,4 @@
 #!/bin/sh
 
-echo "JAR file"
+echo "Recompose"
 exit 0

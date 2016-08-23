@@ -1,18 +1,28 @@
-# Heroku Jarfile Buildpack
+# Heroku Recompose Buildpack
 
 This is a [Heroku Buildpack](https://devcenter.heroku.com/articles/buildpacks)
-that allows you to install JAR files into a slug.
+that will recompose an application from other Heroku applications that have
+already been deployed
 
 ## Usage
 
-Create a `.jarfile` in the root directory of your Git repository, and list the JAR file
-you want the buildpack to download. The buildpack supports HTTP URLs and S3 URLs:
+```
+$ heroku create
+$ heroku buildpacks:set https://github.com/jkutner/heroku-buildpack-recompose
+$ heroku config:set HEROKU_API_USER="$(heroku auth:whoami)"
+$ heroku config:set HEROKU_API_KEY="$(heroku auth:token)"
+```
+
+Create an `Appfile` with the names of your apps:
 
 ```
-https://user:${JAR_SERVER_PASSWORD}@my-server.com/my-private-dep-1.0.jar
-s3://my-bucket/my-private-dep-1.0.jar
+obscure-ocean-46482 3
+safe-temple-58473 4
+frozen-springs-75068 3
 ```
 
-For S3 URLs, the buildpack will use s3cmd and honor
+Create a `Procfile.recompose` with the command to start your app:
 
-All downloaded JAR files will be placed in the root directory of the app.
+```
+web: sh bin/start
+```

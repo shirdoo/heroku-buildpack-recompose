@@ -3,76 +3,12 @@
 # fail fast
 set -eu
 
-indent() {
-  sed -u 's/^/       /'
-}
-
-export_env_dir() {
-  env_dir=$1
-  whitelist_regex=${2:-''}
-  blacklist_regex=${3:-'^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH|JAVA_OPTS)$'}
-  if [ -d "$env_dir" ]; then
-    for e in $(ls $env_dir); do
-      echo "$e" | grep -E "$whitelist_regex" | grep -qvE "$blacklist_regex" &&
-      export "$e=$(cat $env_dir/$e)"
-      :
-    done
-  fi
-}
-
 # parse args
+BP_DIR="$(cd "$(dirname "$0")" && pwd)"
 BUILD_DIR=$1
-CACHE_DIR=$2
-ENV_DIR=$3
+OPT_DIR=$BP_DIR/../opt/
 
-export_env_dir $ENV_DIR
-
-cd $BUILD_DIR
-
-jarfile=${JARFILE:-.jarfile}
-
-if [[ $(cat $jarfile) == *s3://* ]]; then
-  if [ ! -f $CACHE_DIR/.apt/usr/bin/s3cmd ]; then
-    APT_CACHE_DIR="$CACHE_DIR/apt/cache"
-    APT_STATE_DIR="$CACHE_DIR/apt/state"
-    APT_OPTIONS="-o debug::nolocking=true -o dir::cache=$APT_CACHE_DIR -o dir::state=$APT_STATE_DIR"
-
-    mkdir -p "$APT_CACHE_DIR/archives/partial"
-    mkdir -p "$APT_STATE_DIR/lists/partial"
-
-    echo "-----> Installing s3cmd... "
-    apt-get $APT_OPTIONS update | indent
-    apt-get $APT_OPTIONS -y --force-yes -d install --reinstall s3cmd | indent
-
-    for DEB in $(ls -1 $APT_CACHE_DIR/archives/*.deb); do
-      dpkg -x $DEB $CACHE_DIR/.apt/
-    done
-  fi
-  PATH=$PATH:$CACHE_DIR/.apt/usr/bin
-
-  if [ -n "${AWS_ACCESS_KEY:-}" ]; then
-    cat << EOF > $HOME/.s3cfg
-[default]
-access_key = ${AWS_ACCESS_KEY}
-secret_key = ${AWS_SECRET_KEY}
-EOF
-  else
-    touch $HOME/.s3cfg
-  fi
-fi
-
-if [ -f $jarfile ]; then
-  while read jar; do
-    if [ -n "$jar" ] && [[ "$jar" == http* ]]; then
-      echo "Downloading $jar" | indent
-      curl --retry 3 --silent -O -L $jar
-    elif [ -n "$jar" ] && [[ "$jar" == s3* ]]; then
-      echo "Downloading $jar" | indent
-      s3cmd get $jar | indent
-    else
-      echo "Skipping $jar" | indent
-    fi
-  done <$jarfile
-fi
-
-rm -f $HOME/.s3cfg
+heroku_bin_dir=$BUILD_DIR/.heroku/bin
+mkdir -p $heroku_bin_dir
+cp $OPT_DIR/recompose $heroku_bin_dir/
+chmod +x ${heroku_bin_dir}/recompose
