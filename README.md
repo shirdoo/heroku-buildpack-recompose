@@ -21,8 +21,9 @@ safe-temple-58473 4
 frozen-springs-75068 3
 ```
 
-Create a `Procfile.recompose` with the command to start your app:
+Create a `bin/web` with the command to start your app:
 
 ```
-web: sh bin/start
+# your code goes here
+java -jar targetmyapp.jar
 ```
