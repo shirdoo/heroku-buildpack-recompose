@@ -10,5 +10,6 @@ OPT_DIR=$BP_DIR/../opt/
 
 heroku_bin_dir=$BUILD_DIR/.heroku/bin
 mkdir -p $heroku_bin_dir
-cp $OPT_DIR/recompose $heroku_bin_dir/
+cp $OPT_DIR/* $heroku_bin_dir/
 chmod +x ${heroku_bin_dir}/recompose
+chmod +x ${heroku_bin_dir}/web

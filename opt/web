@@ -1,0 +1,2 @@
+echo "Starting proxy server..."
+ruby /app/.heroku/bin/proxy.rb
