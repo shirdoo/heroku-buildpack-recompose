@@ -4,7 +4,7 @@
 #set -eu
 
 if [ -f .heroku/bin/web ]; then
-  eval "./bin/web &"
+  eval "./.heroku/bin/web &"
   pid=$!
   trap "kill -9 $pid; exit" SIGKILL
 else
