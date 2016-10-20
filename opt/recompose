@@ -57,4 +57,10 @@ done </app/Appfile
 
 rm $HOME/.netrc
 
+if [ -n "$WEB_PROCESS_CMD" ]; then
+  eval "${WEB_PROCESS_CMD} &"
+  app_pid=$!
+  trap "kill -9 $app_pid; exit" SIGKILL
+fi
+
 while kill -0 $pid; do sleep 5; done
