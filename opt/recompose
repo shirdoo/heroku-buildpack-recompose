@@ -42,7 +42,7 @@ while read app_release; do
         echo "--> Downloading slug ${slug_id} for ${app}"
         [ -n "$RECOMPOSE_DIR" ] && mkdir -p $RECOMPOSE_DIR
         curl --retry 3 -s -L "${slug_url}" | \
-            tar xzm --strip-components=2 -C ${RECOMPOSE_DIR:-.} 2>&1 | \
+            tar xzm --strip-components=1 -C . 2>&1 | \
             grep -v "Ignoring unknown extended header keyword"
       else
         echo "--> ERROR: could not find slug $slug_id for $app_release"
