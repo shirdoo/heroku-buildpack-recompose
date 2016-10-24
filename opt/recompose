@@ -56,6 +56,8 @@ done </app/Appfile
 
 rm $HOME/.netrc
 
+echo "true" > $HOME/.recompose
+
 if [ -n "$WEB_PROCESS_CMD" ]; then
   eval "${WEB_PROCESS_CMD} &"
   app_pid=$!
