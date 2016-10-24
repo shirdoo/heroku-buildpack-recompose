@@ -33,7 +33,7 @@ echo 'buildpack=nginx at=logs-initialized'
 	#We expect nginx to run in foreground.
 	#We also expect a socket to be at /tmp/nginx.socket.
 	echo 'buildpack=nginx at=nginx-start'
-	.heroku/bin/nginx -p . -c nginx.conf
+	bin/nginx -p . -c nginx.conf
 	echo 'nginx' >$psmgr
 ) &
 
