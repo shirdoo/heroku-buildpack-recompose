@@ -3,8 +3,8 @@
 # don't fail fast
 #set -eu
 
-[ -z "$HEROKU_API_KEY" ] && echo " ! ERROR: Missing HEROKU_API_KEY config var"
-[ -z "$HEROKU_API_USER" ] && echo " ! ERROR: Missing HEROKU_API_USER config var"
+[ -z "$HEROKU_API_KEY" ] && echo " ! ERROR: missing HEROKU_API_KEY config var"
+[ -z "$HEROKU_API_USER" ] && echo " ! ERROR: missing HEROKU_API_USER config var"
 
 if [ -f .nginx/bin/nginx-start ]; then
   cd .nginx > /dev/null 2>&1
@@ -46,13 +46,13 @@ while read app_release; do
       if [ -n "$slug_url" ]; then
         echo "--> Downloading slug ${slug_id} for ${app}"
         curl --retry 3 -s -L "${slug_url}" | \
-            tar xzm --strip-components=2 -C . 2>&1 | \
+            tar xzm --strip-components=1 -C . 2>&1 | \
             grep -v "Ignoring unknown extended header keyword"
       else
-        echo "--> ERROR: could not find slug $slug_id for $app_release"
+        echo "! ERROR: could not find slug $slug_id for $app_release"
       fi
     else
-      echo "--> ERROR: could not find release v${release} for ${app}"
+      echo "! ERROR: could not find release v${release} for ${app}"
     fi
   else
     echo "--> Done"
