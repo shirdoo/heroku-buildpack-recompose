@@ -3,6 +3,40 @@
 # don't fail fast
 #set -eu
 
+# Enable job control
+set -m
+
+process_slug() {
+  local app_release=${1}
+
+  echo "--> Processing $app_release"
+
+  local app_release_array=($app_release)
+  local app=${app_release_array[0]}
+  local release=${app_release_array[1]}
+
+  local slug_id=$(curl --retry 3 -s -n https://api.heroku.com/apps/$app/releases/$release \
+    -H "Accept: application/vnd.heroku+json; version=3" | \
+    python -c 'import json,sys;obj=json.load(sys.stdin);print obj["slug"]["id"]')
+
+  if [ -n "$slug_id" ]; then
+    local slug_url=$(curl --retry 3 -s -n https://api.heroku.com/apps/$app/slugs/$slug_id \
+      -H "Accept: application/vnd.heroku+json; version=3" | \
+      python -c 'import json,sys;obj=json.load(sys.stdin);print obj["blob"]["url"]')
+
+    if [ -n "$slug_url" ]; then
+      echo "--> Downloading slug ${slug_id} for ${app}"
+      curl --retry 3 -s -L "${slug_url}" | \
+          tar xzm --strip-components=1 -C . 2>&1 | \
+          grep -v "Ignoring unknown extended header keyword" &
+    else
+      echo "! ERROR: could not find slug $slug_id for $app_release"
+    fi
+  else
+    echo "! ERROR: could not find release v${release} for ${app}"
+  fi
+}
+
 [ -z "$HEROKU_API_KEY" ] && echo " ! ERROR: missing HEROKU_API_KEY config var"
 [ -z "$HEROKU_API_USER" ] && echo " ! ERROR: missing HEROKU_API_USER config var"
 
@@ -25,39 +59,36 @@ EOF
 
 echo "" >> Appfile
 
-echo "Reading Appfile..."
+echo "Reading primary parts Appfile..."
 while read app_release; do
-  if [ -n "$app_release" ]; then
-    echo "--> Processing $app_release"
-
-    app_release_array=($app_release)
-    app=${app_release_array[0]}
-    release=${app_release_array[1]}
-
-    slug_id=$(curl --retry 3 -s -n https://api.heroku.com/apps/$app/releases/$release \
-      -H "Accept: application/vnd.heroku+json; version=3" | \
-      python -c 'import json,sys;obj=json.load(sys.stdin);print obj["slug"]["id"]')
-
-    if [ -n "$slug_id" ]; then
-      slug_url=$(curl --retry 3 -s -n https://api.heroku.com/apps/$app/slugs/$slug_id \
-        -H "Accept: application/vnd.heroku+json; version=3" | \
-        python -c 'import json,sys;obj=json.load(sys.stdin);print obj["blob"]["url"]')
-
-      if [ -n "$slug_url" ]; then
-        echo "--> Downloading slug ${slug_id} for ${app}"
-        curl --retry 3 -s -L "${slug_url}" | \
-            tar xzm --strip-components=1 -C . 2>&1 | \
-            grep -v "Ignoring unknown extended header keyword"
-      else
-        echo "! ERROR: could not find slug $slug_id for $app_release"
-      fi
-    else
-      echo "! ERROR: could not find release v${release} for ${app}"
-    fi
-  else
-    echo "--> Done"
+  if [ -n "$app_release" ] && [ "$app_release" != "---" ]; then
+    process_slug "$app_release"
   fi
 done </app/Appfile
+echo "--> Done reading primary parts from Appfile"
+
+# Wait for all parallel jobs to finish
+while [ 1 ]; do fg > /dev/null 2>&1; [ $? == 1 ] && break; done
+echo "All primary downloads finished"
+
+echo "Reading overlay parts from Appfile..."
+overlay=0
+while read app_release; do
+  if [ -n "$app_release" ] && [ $overlay = 1 ]; then
+    process_slug "$app_release"
+  elif [ "$app_release" = "---" ]; then
+    overlay=1
+  fi
+done </app/Appfile
+if [ $overlay = 1 ]; then
+  echo "--> Done reading overlay parts from Appfile"
+
+  # Wait for all parallel jobs to finish
+  while [ 1 ]; do fg > /dev/null 2>&1; [ $? == 1 ] && break; done
+  echo "All overlay downloads finished"
+else
+  echo "No overlay parts found"
+fi
 
 rm $HOME/.netrc
 
