@@ -79,17 +79,17 @@ echo "--> Done reading primary parts from Appfile"
 wait_for_downloads $apps "All primary downloads finished"
 
 echo "Reading overlay parts from Appfile..."
-overlays=0
+overlay=0
 while read app_release; do
-  if [ -n "$app_release" ] && [ $overlays = 1 ]; then
+  if [ -n "$app_release" ] && [ $overlay = 1 ]; then
     process_slug "$app_release"
   elif [ "$app_release" = "---" ]; then
-    overlays=$((overlays+1))
+    overlay=1
   fi
 done </app/Appfile
-if [ $overlays != 0 ]; then
+if [ $overlay = 1 ]; then
   echo "--> Done reading overlay parts from Appfile"
-  wait_for_downloads $overlays "All overlay downloads finished"
+  wait_for_downloads 1 "All overlay downloads finished"
 else
   echo "No overlay parts found"
 fi
