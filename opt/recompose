@@ -37,8 +37,8 @@ process_slug() {
   fi
 }
 
-[ -z "$HEROKU_API_KEY" ] && echo " ! ERROR: missing HEROKU_API_KEY config var"
-[ -z "$HEROKU_API_USER" ] && echo " ! ERROR: missing HEROKU_API_USER config var"
+[ -z "$HEROKU_API_KEY" ] && echo " ! ERROR: missing HEROKU_API_KEY config var" && exit 1
+[ -z "$HEROKU_API_USER" ] && echo " ! ERROR: missing HEROKU_API_USER config var" && exit 1
 
 if [ -f .nginx/bin/nginx-start ]; then
   cd .nginx > /dev/null 2>&1
