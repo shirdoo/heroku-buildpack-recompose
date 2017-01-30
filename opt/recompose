@@ -47,7 +47,8 @@ wait_for_downloads() {
 [ -z "$HEROKU_API_KEY" ] && echo " ! ERROR: missing HEROKU_API_KEY config var" && exit 1
 [ -z "$HEROKU_API_USER" ] && echo " ! ERROR: missing HEROKU_API_USER config var" && exit 1
 
-if [ -f .nginx/bin/nginx-start ]; then
+# Only start nginx if he WEB_PROCESS_CMD is defined
+if [ -f .nginx/bin/nginx-start ] && [ -n "$WEB_PROCESS_CMD" ]; then
   cd .nginx > /dev/null 2>&1
   eval "bin/nginx-start &"
   pid=$!
@@ -102,6 +103,8 @@ if [ -n "$WEB_PROCESS_CMD" ]; then
   eval "${WEB_PROCESS_CMD} &"
   app_pid=$!
   trap "kill -9 $app_pid; exit" SIGKILL
+
+  while kill -0 $pid; do sleep 5; done
 fi
 
-while kill -0 $pid; do sleep 5; done
+echo "--> $0 exiting"
