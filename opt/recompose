@@ -100,11 +100,8 @@ rm $HOME/.netrc
 echo "true" > $HOME/.recompose
 
 if [ -n "$WEB_PROCESS_CMD" ]; then
-  eval "${WEB_PROCESS_CMD} &"
-  app_pid=$!
-  trap "kill -9 $app_pid; exit" SIGKILL
-
-  while kill -0 $pid; do sleep 5; done
+  echo "--> ${WEB_PROCESS_CMD}"
+  exec ${WEB_PROCESS_CMD}
 fi
 
 echo "--> $0 exiting"
