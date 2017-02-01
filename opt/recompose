@@ -6,8 +6,12 @@
 # Enable job control
 set -m
 
+# first argument on the command line is the process to start after
+# recomposision is complete
+cmd=${1}
+
 process_slug() {
-  local app_release=${1}
+  local app_release=${1:?}
 
   echo "--> Processing $app_release"
 
@@ -38,8 +42,8 @@ process_slug() {
 }
 
 wait_for_downloads() {
-  local job_count=$1
-  local message=$2
+  local job_count=${1:?}
+  local message=${2:?}
   for i in $(seq 1 1 $job_count); do fg $((i+1)) > /dev/null 2>&1; done
   echo $2
 }
@@ -99,9 +103,9 @@ rm $HOME/.netrc
 
 echo "true" > $HOME/.recompose
 
-if [ -n "$WEB_PROCESS_CMD" ]; then
-  echo "--> ${WEB_PROCESS_CMD}"
-  exec ${WEB_PROCESS_CMD}
+if [ -n "$cmd" ]; then
+  echo "--> ${cmd}"
+  exec ${cmd:?}
 fi
 
 echo "--> $0 exiting"
