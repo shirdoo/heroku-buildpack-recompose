@@ -104,7 +104,7 @@ rm $HOME/.netrc
 echo "true" > $HOME/.recompose
 
 if [ -n "$cmd" ]; then
-  echo "--> ${cmd}"
+  echo "--> cmd: ${cmd}"
   exec ${cmd:?}
 fi
 
