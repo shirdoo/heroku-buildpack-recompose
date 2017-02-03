@@ -6,6 +6,6 @@ if [ ! -f $BUILD_DIR/Procfile ]; then
 ---
 config_vars:
 default_process_types:
-  web: .heroku/bin/recompose $WEB_PROCESS_CMD
+  web: .heroku/bin/recompose \$WEB_PROCESS_CMD
 EOF
 fi
