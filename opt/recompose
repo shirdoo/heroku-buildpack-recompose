@@ -9,6 +9,7 @@ set -m
 # first argument on the command line is the process to start after
 # recomposision is complete
 cmd=${1}
+AWS_CMD=/app/vendor/awscli/bin/aws
 
 process_slug() {
   local app_release=${1:?}
@@ -41,6 +42,23 @@ process_slug() {
   fi
 }
 
+process_s3() {
+  local release=${1:?}
+
+  echo "--> Processing $release"
+
+  local release_array=(${release:?})
+  local name=${release_array[0]:?}
+  local version=${release_array[1]:?}
+
+  {[ -z "$name"] || [ -z "$version"]} && echo "! ERROR: could not find name and/or version" && return 0
+
+  local file_name="${name:?}-${version:?}"
+
+  ${AWS_CMD:?} s3 cp s3://${AWS_S3_BUCKET_NAME:?}/${file_name:?} - | tar xzm --strip-components=1 -C . 2>&1 | \
+          grep -v "Ignoring unknown extended header keyword"
+}
+
 wait_for_downloads() {
   local job_count=${1:?}
   local message=${2:?}
@@ -50,6 +68,10 @@ wait_for_downloads() {
 
 [ -z "$HEROKU_API_KEY" ] && echo " ! ERROR: missing HEROKU_API_KEY config var" && exit 1
 [ -z "$HEROKU_API_USER" ] && echo " ! ERROR: missing HEROKU_API_USER config var" && exit 1
+[ -z "$AWS_ACCESS_KEY_ID"] && echo " ! ERROR: missing AWS_ACCESS_KEY_ID config var" && exit 1
+[ -z "$AWS_SECRET_ACCESS_KEY"] && echo " ! ERROR: missing AWS_SECRET_ACCESS_KEY config var" && exit 1
+[ -z "$AWS_S3_BUCKET_NAME"] && echo " ! ERROR: missing AWS_S3_BUCKET_NAME config var" && exit 1
+
 
 # Only start nginx if he WEB_PROCESS_CMD is defined
 if [ -f .nginx/bin/nginx-start ] && [ -n "$WEB_PROCESS_CMD" ]; then
@@ -69,7 +91,9 @@ machine api.heroku.com
   password $HEROKU_API_KEY
 EOF
 
+# Reconstruct app from the app file
 echo "" >> Appfile
+echo "" >> DataModelFile
 
 echo "Reading primary parts Appfile..."
 apps=0
@@ -97,6 +121,16 @@ if [ $overlay = 1 ]; then
   wait_for_downloads 1 "All overlay downloads finished"
 else
   echo "No overlay parts found"
+fi
+
+# Reconstruct the datamodel from the DataModelFile
+if [ -n "$DATAMODEL" ] ; then
+  echo "Reading datamodel parts from DataModelFile..."
+  while read datamodel_release; do
+    if [ -n "$datamodel_release"] ; then
+      process_s3 "$datamodel_release"
+    fi
+  done </app/DataModelFile
 fi
 
 rm $HOME/.netrc
