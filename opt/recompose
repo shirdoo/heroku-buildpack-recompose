@@ -51,12 +51,12 @@ process_s3() {
   local name=${release_array[0]:?}
   local version=${release_array[1]:?}
 
-  {[ -z "$name"] || [ -z "$version"]} && echo "! ERROR: could not find name and/or version" && return 0
+  { [ -z "$name" ] || [ -z "$version" ] } && echo "! ERROR: could not find name and/or version" && return 0
 
   local file_name="${name:?}-${version:?}"
 
-  ${AWS_CMD:?} s3 cp s3://${AWS_S3_BUCKET_NAME:?}/${file_name:?} - | tar xzm --strip-components=1 -C . 2>&1 | \
-          grep -v "Ignoring unknown extended header keyword"
+  ${AWS_CMD:?} s3 cp s3://${AWS_S3_BUCKET_NAME:?}/${file_name:?} - | tar xzm --strip-components=1 -C . 2>&1
+
 }
 
 wait_for_downloads() {
@@ -68,9 +68,9 @@ wait_for_downloads() {
 
 [ -z "$HEROKU_API_KEY" ] && echo " ! ERROR: missing HEROKU_API_KEY config var" && exit 1
 [ -z "$HEROKU_API_USER" ] && echo " ! ERROR: missing HEROKU_API_USER config var" && exit 1
-[ -z "$AWS_ACCESS_KEY_ID"] && echo " ! ERROR: missing AWS_ACCESS_KEY_ID config var" && exit 1
-[ -z "$AWS_SECRET_ACCESS_KEY"] && echo " ! ERROR: missing AWS_SECRET_ACCESS_KEY config var" && exit 1
-[ -z "$AWS_S3_BUCKET_NAME"] && echo " ! ERROR: missing AWS_S3_BUCKET_NAME config var" && exit 1
+[ -z "$AWS_ACCESS_KEY_ID" ] && echo " ! ERROR: missing AWS_ACCESS_KEY_ID config var" && exit 1
+[ -z "$AWS_SECRET_ACCESS_KEY" ] && echo " ! ERROR: missing AWS_SECRET_ACCESS_KEY config var" && exit 1
+[ -z "$AWS_S3_BUCKET_NAME" ] && echo " ! ERROR: missing AWS_S3_BUCKET_NAME config var" && exit 1
 
 
 # Only start nginx if he WEB_PROCESS_CMD is defined
@@ -127,7 +127,7 @@ fi
 if [ -n "$DATAMODEL" ] ; then
   echo "Reading datamodel parts from DataModelFile..."
   while read datamodel_release; do
-    if [ -n "$datamodel_release"] ; then
+    if [ -n "$datamodel_release" ] ; then
       process_s3 "$datamodel_release"
     fi
   done </app/DataModelFile
