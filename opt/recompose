@@ -48,10 +48,13 @@ process_s3() {
   echo "--> Processing $release"
 
   local release_array=(${release:?})
-  local name=${release_array[0]:?}
-  local version=${release_array[1]:?}
+  local name=${release_array[0]}
+  local version=${release_array[1]}
 
-  { [ -z "$name" ] || [ -z "$version" ] } && echo "! ERROR: could not find name and/or version" && return 0
+  if [ -z "${name}" ] || [ -z "${version}" ]; then 
+    echo "! ERROR: could not find name and/or version"
+    return 0
+  fi
 
   local file_name="${name:?}-${version:?}"
 
@@ -116,6 +119,7 @@ while read app_release; do
     overlay=1
   fi
 done </app/Appfile
+
 if [ $overlay = 1 ]; then
   echo "--> Done reading overlay parts from Appfile"
   wait_for_downloads 1 "All overlay downloads finished"
