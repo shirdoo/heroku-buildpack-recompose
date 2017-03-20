@@ -102,10 +102,10 @@ echo "" >> ToolsFile
 
 echo "Reading tools parts ToolsFile..."
 while read tools_release; do
-    if [ -n "$tools_release" ] ; then
+  if [ -n "$tools_release" ] ; then
       process_s3 "$tools_release"
-    fi
-  done </app/ToolsFile
+  fi
+done </app/ToolsFile
 
 echo "Reading primary parts Appfile..."
 apps=0
