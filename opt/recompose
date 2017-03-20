@@ -156,7 +156,7 @@ echo "true" > $HOME/.recompose
 
 if [ -n "$cmd" ]; then
   echo "--> cmd: ${cmd}"
-  exec ${cmd:?}
+  exec bash ${cmd:?}
 fi
 
 echo "--> $0 exiting"
