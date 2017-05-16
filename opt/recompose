@@ -11,6 +11,7 @@ set -m
 cmd=${1}
 AWS_CMD=/app/vendor/awscli/bin/aws
 PSQL_TAR=psql.tar
+FTEST_XML=ftest.xml
 
 process_slug() {
   local app_release=${1:?}
@@ -151,6 +152,12 @@ rm $HOME/.netrc
 # download and untar the correct psql binary from s3
 echo "Downloading psql.tar from s3..."
 ${AWS_CMD:?} s3 cp s3://${AWS_S3_BUCKET_NAME:?}/${PSQL_TAR:?} - | tar xzmv 2>&1
+
+# download the ftest inventory with hardcoded heroku file paths
+# uploaded with aws s3 cp ~/blt/app/main/core/sfdc-test/func/ftest.xml s3://heroku-sfdc-zero/ftest.xml
+echo "Downloading ftest.xml from s3..."
+${AWS_CMD:?} s3 cp s3://${AWS_S3_BUCKET_NAME:?}/${FTEST_XML:?} -
+mv ${FTEST_XML:?} /app/app/main/core/sfdc-test/func/.
 
 echo "true" > $HOME/.recompose
 
