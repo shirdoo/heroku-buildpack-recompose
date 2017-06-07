@@ -107,44 +107,8 @@ while read tools_release; do
   fi
 done </app/ToolsFile
 
-echo "Reading primary parts Appfile..."
-apps=0
-while read app_release; do
-  if [ -n "$app_release" ] && [ "$app_release" != "---" ]; then
-    process_s3 "$app_release"
-    apps=$((apps+1))
-  fi
-done </app/Appfile
-
-echo "--> Done reading primary parts from Appfile"
-wait_for_downloads $apps "All primary downloads finished"
-
-# echo "Reading overlay parts from Appfile..."
-# overlay=0
-# while read app_release; do
-#   if [ -n "$app_release" ] && [ $overlay = 1 ]; then
-#     process_slug "$app_release"
-#   elif [ "$app_release" = "---" ]; then
-#     overlay=1
-#   fi
-# done </app/Appfile
-
-# if [ $overlay = 1 ]; then
-#   echo "--> Done reading overlay parts from Appfile"
-#   wait_for_downloads 1 "All overlay downloads finished"
-# else
-#   echo "No overlay parts found"
-# fi
-
-# Reconstruct the datamodel from the DataModelFile
-if [ -n "$DATAMODEL" ] ; then
-  echo "Reading datamodel parts from DataModelFile..."
-  while read datamodel_release; do
-    if [ -n "$datamodel_release" ] ; then
-      process_s3 "$datamodel_release"
-    fi
-  done </app/DataModelFile
-fi
+echo "Invoke Java"
+java -version
 
 rm $HOME/.netrc
 
