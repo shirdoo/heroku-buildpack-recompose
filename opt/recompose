@@ -109,6 +109,8 @@ done </app/ToolsFile
 
 echo "Invoke Java"
 java -version
+pwd
+echo "pwd above"
 
 rm $HOME/.netrc
 
