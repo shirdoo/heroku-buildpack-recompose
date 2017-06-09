@@ -118,8 +118,7 @@ java -jar recomposer.jar
 echo "Java Recomposer Exited"
 
 echo "Downloading sfdc customizations from s3..."
-local recomposer=recompose-0.0.9-SNAPSHOT.jar
- ${AWS_CMD:?} s3 cp s3://${AWS_S3_BUCKET_NAME:?}/${recomposer:?} recomposer.jar 2>&1
+ ${AWS_CMD:?} s3 cp s3://${AWS_S3_BUCKET_NAME:?}/recompose-0.0.9-SNAPSHOT.jar recomposer.jar 2>&1
 
 
 
