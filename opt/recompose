@@ -101,7 +101,7 @@ echo "" >> DataModelFile
 echo "" >> ToolsFile
 
 echo "Downloading jdk1.8.0_131_x64 from s3Key:d5eab6c07320844df2961afd84f95df8"
-${AWS_CMD:?} s3 cp s3://${AWS_S3_BUCKET_NAME:?}/s3Key:d5eab6c07320844df2961afd84f95df8 - | tar xzmv 2>&1
+${AWS_CMD:?} s3 cp s3://${AWS_S3_BUCKET_NAME:?}/d5eab6c07320844df2961afd84f95df8 - | tar xzmv 2>&1
 
 echo "****** Invoke Java Recomposer"
 echo $JAVA_HOME
