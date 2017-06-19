@@ -44,12 +44,12 @@ process_slug() {
 }
 
 
-wait_for_downloads() {
-  local job_count=${1:?}
-  local message=${2:?}
-  for i in $(seq 1 1 $job_count); do fg $((i+1)) > /dev/null 2>&1; done
-  echo $2
-}
+#wait_for_downloads() {
+#  local job_count=${1:?}
+#  local message=${2:?}
+#  for i in $(seq 1 1 $job_count); do fg $((i+1)) > /dev/null 2>&1; done
+#  echo $2
+#}
 
 [ -z "$HEROKU_API_KEY" ] && echo " ! ERROR: missing HEROKU_API_KEY config var" && exit 1
 [ -z "$HEROKU_API_USER" ] && echo " ! ERROR: missing HEROKU_API_USER config var" && exit 1
@@ -93,13 +93,10 @@ echo "Invoke Java Recomposer"
 echo $JAVA_HOME
 echo `which java`
 java -jar recomposer.jar
-echo "Java Recomposer Exited"
+echo "Java Recomposer Completed"
 
 echo "Downloading sfdc customizations from s3..."
 ${AWS_CMD:?} s3 cp s3://${AWS_S3_BUCKET_NAME:?}/${SFDC_CUSTOM:?} - | tar xzmv 2>&1
-
-
-
 
 
 echo "true" > $HOME/.recompose
