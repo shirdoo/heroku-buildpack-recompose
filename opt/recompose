@@ -43,25 +43,6 @@ process_slug() {
   fi
 }
 
-process_s3() {
-  local release=${1:?}
-
-  echo "--> Processing $release"
-
-  local release_array=(${release:?})
-  local name=${release_array[0]}
-  local version=${release_array[1]}
-
-  if [ -z "${name}" ] || [ -z "${version}" ]; then 
-    echo "! ERROR: could not find name and/or version"
-    return 0
-  fi
-
-  local file_name="${name:?}-${version:?}"
-
-  ${AWS_CMD:?} s3 cp s3://${AWS_S3_BUCKET_NAME:?}/${file_name:?} - | tar xzm --strip-components=1 -C . 2>&1
-
-}
 
 wait_for_downloads() {
   local job_count=${1:?}
@@ -105,12 +86,6 @@ echo "**** Downloading recomposer.jar from s3..."
 ###################################################################################################
 
 
-echo "Reading tools parts ToolsFile..."
-while read tools_release; do
-  if [ -n "$tools_release" ] ; then
-      process_s3 "$tools_release"
-  fi
-done </app/ToolsFile
 
 rm $HOME/.netrc
 
