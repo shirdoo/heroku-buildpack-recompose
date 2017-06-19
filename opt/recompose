@@ -95,10 +95,6 @@ machine api.heroku.com
   password $HEROKU_API_KEY
 EOF
 
-# Reconstruct app from the app file
-echo "" >> Appfile
-echo "" >> DataModelFile
-echo "" >> ToolsFile
 
 ############ Downloading jdk1.8.0_131_x64,  recomposer.jar #######################################
 echo "**** Downloading jdk1.8.0_131_x64 from s3Key:d5eab6c07320844df2961afd84f95df8"
