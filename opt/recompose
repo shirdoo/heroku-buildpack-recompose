@@ -9,6 +9,7 @@ set -m
 # first argument on the command line is the process to start after
 # recomposision is complete
 cmd=${1}
+echo "******************************************** CMD= $cmd ********************************"
 AWS_CMD=/app/vendor/awscli/bin/aws
 SFDC_CUSTOM=sfdc-custom.tar.gz
 
