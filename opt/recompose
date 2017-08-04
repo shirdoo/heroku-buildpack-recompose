@@ -96,8 +96,8 @@ echo `which java`
 java -jar recomposer.jar
 echo "Java Recomposer Completed"
 
-echo "Downloading sfdc customizations from s3..."
-${AWS_CMD:?} s3 cp s3://${AWS_S3_BUCKET_NAME:?}/${SFDC_CUSTOM:?} - | tar xzmv 2>&1
+#echo "Downloading sfdc customizations from s3..."
+#${AWS_CMD:?} s3 cp s3://${AWS_S3_BUCKET_NAME:?}/${SFDC_CUSTOM:?} - | tar xzmv 2>&1
 
 
 echo "true" > $HOME/.recompose
